@@ -43,6 +43,8 @@ coverage/
 # Results and outputs
 results/*.json
 evalite-results/*.json
+eval-results/*.json
+eval-results/
 
 # Temporary files
 tmp/
