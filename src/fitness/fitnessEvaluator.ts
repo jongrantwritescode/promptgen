@@ -1,6 +1,8 @@
 import { FitnessEvaluator, TestCase, RubricCriterion } from "../types.js";
 import { OpenAIProvider } from "../providers/openaiProvider.js";
 import { sleep, retryWithBackoff, RateLimiter } from "../util/rateLimiter.js";
+import OpenAI from "openai";
+import { Levenshtein } from "autoevals";
 
 const rateLimiter = new RateLimiter();
 
@@ -10,8 +12,10 @@ export const llmFitnessEvaluator: FitnessEvaluator = {
     let totalScore = 0;
     let validTests = 0;
 
-    // Create OpenAI provider instance here to ensure env vars are loaded
-    const openaiProvider = new OpenAIProvider();
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     // Reduce API calls: only test 2 cases instead of 5 for efficiency
     const testCasesToUse = testCases.slice(0, 2);
@@ -20,27 +24,45 @@ export const llmFitnessEvaluator: FitnessEvaluator = {
       const testCase = testCasesToUse[i];
       if (testCase) {
         console.log(
-          `        🧪 Testing case ${i + 1}/${testCasesToUse.length}: "${
-            testCase.input
-          }" -> "${testCase.expectedOutput}"`
+          `        🧪 Testing case ${i + 1}/${
+            testCasesToUse.length
+          }: "${testCase.input.substring(0, 50)}..." -> "${
+            testCase.expectedOutput
+          }"`
         );
 
         try {
-          const rubric: RubricCriterion = {
-            name: "accuracy",
-            description: "How accurate is the response?",
-            weight: 1.0,
-            evaluator: "llm",
-            prompt: `Rate the accuracy of this response on a scale of 0-1. Consider correctness, relevance, and completeness.`,
-          };
-
           // Check rate limit before making API call
           await rateLimiter.waitIfNeeded();
 
-          console.log(`        🤖 Calling OpenAI API...`);
-          const score = await retryWithBackoff(async () => {
-            return await openaiProvider.evaluate(prompt, testCase, rubric);
+          console.log(`        🤖 Running LLM with evolved prompt...`);
+
+          // Run the LLM with the evolved prompt
+          const response = await retryWithBackoff(async () => {
+            return await openai.chat.completions.create({
+              model: "gpt-3.5-turbo",
+              messages: [
+                {
+                  role: "user",
+                  content: `${prompt}\n\nInput:\n${testCase.input}`,
+                },
+              ],
+              temperature: 0.3,
+              max_tokens: 100,
+            });
           });
+
+          const actualOutput =
+            response.choices[0]?.message?.content?.trim() || "";
+          console.log(`        📝 LLM output: "${actualOutput}"`);
+
+          // Score the output against expected using Levenshtein distance
+          const levenshteinResult = await Levenshtein({
+            output: actualOutput,
+            expected: testCase.expectedOutput,
+          });
+
+          const score = levenshteinResult.score || 0;
           console.log(
             `        ✅ Test case ${i + 1} score: ${score.toFixed(3)}`
           );

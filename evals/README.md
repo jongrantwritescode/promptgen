@@ -142,6 +142,7 @@ evalite("Article Summary", {
 ### Built-in Scorers
 
 Available scorers from the autoevals library:
+
 - **Levenshtein**: Edit distance between strings
 - **SemanticSimilarity**: Semantic similarity using embeddings
 - **FactualityScorer**: Fact-checking and accuracy scoring
@@ -150,7 +151,8 @@ Available scorers from the autoevals library:
 
 ### Results
 
-Results are saved to `evalite-results/evolution-results.json` with:
+Results are saved to `eval-results/evolution-results.json` with:
+
 - Best evolved prompts
 - Hall of fame (top performing prompts)
 - Evolution statistics

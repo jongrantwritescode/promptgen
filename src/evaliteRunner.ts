@@ -47,7 +47,7 @@ export class EvaliteRunner {
     const fs = await import("fs");
     const path = await import("path");
 
-    const resultsDir = path.join(process.cwd(), "evalite-results");
+    const resultsDir = path.join(process.cwd(), "eval-results");
     if (!fs.existsSync(resultsDir)) {
       fs.mkdirSync(resultsDir, { recursive: true });
     }

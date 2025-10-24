@@ -17,10 +17,10 @@ const openai = new OpenAI({
 const articlesDir = "data/articles";
 const articleFiles = [
   "climate-change.txt",
-  "nutrition-guide.txt", 
+  "nutrition-guide.txt",
   "travel-tips.txt",
   "financial-advice.txt",
-  "health-wellness.txt"
+  "health-wellness.txt",
 ];
 
 const expectedSummaries = [
@@ -28,18 +28,18 @@ const expectedSummaries = [
   "Balanced diet with whole foods, lean proteins, and vegetables promotes health",
   "Research destinations, book early, pack light, and embrace local culture",
   "Save regularly, diversify investments, and plan for long-term goals",
-  "Regular exercise, good sleep, and stress management are key to wellness"
+  "Regular exercise, good sleep, and stress management are key to wellness",
 ];
 
 // Create test cases by loading files
 export const testCases = articleFiles.map((filename, index) => {
   const filePath = path.join(articlesDir, filename);
-  const content = fs.readFileSync(filePath, 'utf-8');
-  
+  const content = fs.readFileSync(filePath, "utf-8");
+
   return {
     input: content,
     expected: expectedSummaries[index],
-    metadata: { filename }
+    metadata: { filename },
   };
 });
 
@@ -48,17 +48,17 @@ evalite("Article Summary", {
   task: async (input) => {
     // This prompt will be evolved by the genetic algorithm
     const prompt = "Summarize the main point of this article in one sentence";
-    
+
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "user",
-          content: `${prompt}\n\nArticle:\n${input}`
-        }
+          content: `${prompt}\n\nArticle:\n${input}`,
+        },
       ],
       temperature: 0.3,
-      max_tokens: 100
+      max_tokens: 100,
     });
 
     return response.choices[0]?.message?.content?.trim() || "";
@@ -66,8 +66,8 @@ evalite("Article Summary", {
   scorers: [
     {
       name: "levenshtein",
-      scorer: ({ output, expected }) => {
-        const result = Levenshtein({ output, expected });
+      scorer: async ({ output, expected }) => {
+        const result = await Levenshtein({ output, expected });
         return result.score || 0;
       },
     },

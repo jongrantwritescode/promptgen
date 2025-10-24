@@ -39,10 +39,7 @@ export class PromptGenEngine {
   private stats: EvolutionStats[] = [];
   private totalEvaluations = 0;
 
-  constructor(
-    config: Config,
-    testCases: TestCase[]
-  ) {
+  constructor(config: Config, testCases: TestCase[]) {
     this.config = config;
     this.testCases = testCases;
     this.hallOfFame = new HallOfFame(config.populationSize);
@@ -179,17 +176,16 @@ export class PromptGenEngine {
   }
 
   private async evaluateFitness(promptText: string): Promise<number> {
-    // Use heuristic evaluation for fitness scoring
-    console.log(`    📏 Running heuristic evaluation...`);
-    const heuristicScore = await heuristicFitnessEvaluator.evaluate(
+    // Use LLM evaluation for fitness scoring
+    console.log(`    🤖 Running LLM evaluation...`);
+    const llmScore = await llmFitnessEvaluator.evaluate(
       promptText,
       this.testCases
     );
-    console.log(`    📏 Heuristic Score: ${heuristicScore.toFixed(3)}`);
+    console.log(`    🤖 LLM Score: ${llmScore.toFixed(3)}`);
 
-    return Math.max(0, Math.min(1, heuristicScore));
+    return Math.max(0, Math.min(1, llmScore));
   }
-
 
   private updateHallOfFame(population: Prompt[]): void {
     for (const prompt of population) {

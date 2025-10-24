@@ -98,4 +98,3 @@ export interface EvolutionResult {
   totalGenerations: number;
   totalEvaluations: number;
 }
-
