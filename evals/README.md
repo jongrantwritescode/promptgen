@@ -1,11 +1,14 @@
 # Evals Directory
 
-This directory contains evaluation configurations for testing evolved prompts using the Evalite framework.
+This directory contains evaluation configurations that serve as the **single source of truth** for all prompt evaluation logic in PromptGen.
 
 ## Purpose
 
-The `evals/` directory is used for **evaluating and testing prompts** that have been evolved through genetic algorithms. Each eval includes:
+The `evals/` directory defines evaluation logic that is used by **both**:
+- **Genetic algorithm training** (automatic evaluation during evolution)
+- **Manual testing** (standalone evaluation using Evalite framework)
 
+Each eval includes:
 - Test cases for evaluation
 - Scoring functions
 - Integration with Evalite framework
@@ -23,8 +26,8 @@ evals/
 
 The `evals/` directory works in conjunction with the `examples/` directory:
 
-1. **Training Phase** (`examples/`): Use genetic algorithms to evolve better prompts
-2. **Evaluation Phase** (`evals/`): Test the evolved prompts using Evalite framework
+1. **Configuration Phase** (`examples/`): Define training parameters and test cases
+2. **Evaluation Phase** (`evals/`): Define evaluation logic (used by both GA and manual testing)
 
 ### Workflow
 
@@ -34,7 +37,10 @@ graph LR
     B --> C[Evolved Prompts]
     C --> D[evals/eval.ts]
     D --> E[Performance Evaluation]
+    D --> B
 ```
+
+**Key Point**: The genetic algorithm automatically uses the evaluation logic from `evals/` during training, ensuring consistency between training and testing phases.
 
 ## Running Evals
 

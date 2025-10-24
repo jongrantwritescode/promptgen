@@ -29,7 +29,7 @@ import {
   llmFitnessEvaluator,
   heuristicFitnessEvaluator,
 } from "./fitness/fitnessEvaluator.js";
-import { evaliteFitnessEvaluator } from "./fitness/evaliteFitnessEvaluator.js";
+import { evaliteIntegration } from "./fitness/evaliteIntegration.js";
 import { OpenAIProvider } from "./providers/openaiProvider.js";
 import { defaultConfig } from "./config/default.config.js";
 
@@ -178,8 +178,8 @@ export class PromptGenEngine {
 
   private async evaluateFitness(promptText: string): Promise<number> {
     console.log(`    🎯 Running Evalite-based evaluation...`);
-    // Use Evalite evaluator for main fitness
-    const evaliteScore = await evaliteFitnessEvaluator.evaluate(
+    // Use Evalite integration for main fitness (same logic as evals directory)
+    const evaliteScore = await evaliteIntegration.evaluate(
       promptText,
       this.testCases
     );

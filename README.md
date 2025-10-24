@@ -124,22 +124,29 @@ promptgen/
 
 PromptGen uses two complementary directories:
 
-### `examples/` - Training Phase
-- **Purpose**: Train prompts using genetic algorithms
+### `examples/` - Training Configuration
+
+- **Purpose**: Configuration and test cases for genetic algorithm training
 - **Content**: Test cases, GA configuration, task documentation
 - **Usage**: `npm run start` (runs genetic algorithm training)
 - **Output**: Evolved prompts with improved performance
 
-### `evals/` - Evaluation Phase  
-- **Purpose**: Evaluate evolved prompts using Evalite framework
+### `evals/` - Evaluation Logic (Single Source of Truth)
+
+- **Purpose**: Evaluation logic used by both genetic algorithm AND manual testing
 - **Content**: Test cases, scoring functions, evaluation logic
-- **Usage**: `npm run eval` (runs prompt evaluation)
+- **Usage**: 
+  - `npm run eval` (manual evaluation)
+  - Genetic algorithm automatically uses this logic during training
 - **Output**: Performance metrics and scores
 
 ### Workflow
-1. **Train** prompts in `examples/` using genetic algorithms
-2. **Evaluate** the evolved prompts in `evals/` using Evalite
-3. **Iterate** by refining training data or evaluation criteria
+
+1. **Configure** training in `examples/` directory
+2. **Define** evaluation logic in `evals/` directory  
+3. **Train** prompts using genetic algorithm (uses evals logic automatically)
+4. **Evaluate** manually using `npm run eval` (same logic as training)
+5. **Iterate** by refining evaluation criteria in `evals/`
 
 ## License
 
