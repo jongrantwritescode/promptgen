@@ -11,7 +11,7 @@ const openai = new OpenAI({
 });
 
 // Test cases for intent classification
-const testCases = [
+export const testCases = [
   {
     input: "What are your business hours?",
     expected: "question",

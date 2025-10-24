@@ -2,7 +2,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-import { runFileBasedEval } from "./fileBasedEvalRunner.js";
+import { runEvaliteEval } from "./evaliteRunner.js";
 import path from "path";
 
 async function main() {
@@ -14,18 +14,17 @@ async function main() {
   const evalArg = args.find((arg) => arg.startsWith("--eval="));
 
   if (evalArg) {
-    // Run file-based eval
     const evalName = evalArg.split("=")[1];
     const evalPath = path.resolve(`evals/${evalName}/${evalName}.eval.ts`);
 
-    console.log(`📁 Running file-based eval: ${evalName}`);
+    console.log(`📁 Running eval: ${evalName}`);
     console.log(`📄 Eval path: ${evalPath}\n`);
 
     try {
-      await runFileBasedEval(evalPath);
+      await runEvaliteEval(evalPath);
       return;
     } catch (error) {
-      console.error("❌ Error running file-based eval:", error);
+      console.error("❌ Error running eval:", error);
       process.exit(1);
     }
   }
@@ -33,12 +32,12 @@ async function main() {
   // No eval specified - show usage
   console.log("❌ No eval specified!");
   console.log("\nUsage:");
-  console.log("  npm run start --eval=<eval-name>");
+  console.log("  npm run start -- --eval=<eval-name>");
   console.log("\nAvailable evals:");
   console.log("  - intent-classification");
   console.log("  - article-summary");
   console.log("\nExample:");
-  console.log("  npm run start --eval=intent-classification");
+  console.log("  npm run start -- --eval=intent-classification");
   process.exit(1);
 }
 

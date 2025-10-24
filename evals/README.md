@@ -33,11 +33,11 @@ evals/
 
 ## How Evals Work
 
-The `evals/` directory contains all evaluation logic and test cases:
+The `evals/` directory contains all evaluation logic and test cases using the Evalite framework:
 
-1. **Evaluation Definition**: Each eval defines test cases, scoring functions, and evaluation logic
+1. **Evaluation Definition**: Each eval defines test cases, scoring functions, and evaluation logic using Evalite
 2. **Genetic Algorithm Training**: The genetic algorithm uses the evaluation logic during evolution
-3. **Manual Testing**: Standalone evaluation using Evalite framework
+3. **Built-in Scoring**: Uses autoevals library for standardized scoring metrics
 
 ### Workflow
 
@@ -45,11 +45,11 @@ The `evals/` directory contains all evaluation logic and test cases:
 graph LR
     A[evals/eval.ts] --> B[Genetic Algorithm Training]
     B --> C[Evolved Prompts]
-    C --> D[Performance Evaluation]
+    C --> D[Evalite Performance Evaluation]
     D --> B
 ```
 
-**Key Point**: The genetic algorithm automatically uses the evaluation logic from `evals/` during training, ensuring consistency between training and testing phases.
+**Key Point**: All evaluations use the Evalite framework with built-in scorers from the autoevals library, ensuring consistency and standardization across all tasks.
 
 ## Running Evals
 
@@ -98,54 +98,61 @@ evalite("Task Name", {
 });
 ```
 
-## File-Based Evals
+## Evalite Framework Integration
 
-PromptGen now supports file-based evaluations for testing prompts against multiple documents:
+All evaluations use the Evalite framework with built-in scorers from the autoevals library:
 
 ### Example: Article Summary Eval
 
 ```typescript
 // evals/article-summary/article-summary.eval.ts
-export const articleSummaryEval: FileBasedEvalConfig = {
-  name: "Article Summary",
-  inputFiles: [
-    "data/articles/climate-change.txt",
-    "data/articles/nutrition-guide.txt",
-    "data/articles/travel-tips.txt",
-    "data/articles/financial-advice.txt",
-    "data/articles/health-wellness.txt",
+import { evalite } from "evalite";
+import { Levenshtein } from "autoevals";
+import fs from "fs";
+
+// Load article files and create test cases
+const articleFiles = ["climate-change.txt", "nutrition-guide.txt", ...];
+const expectedSummaries = ["Climate patterns are changing...", ...];
+
+export const testCases = articleFiles.map((filename, index) => {
+  const content = fs.readFileSync(`data/articles/${filename}`, 'utf-8');
+  return {
+    input: content,
+    expected: expectedSummaries[index],
+    metadata: { filename }
+  };
+});
+
+evalite("Article Summary", {
+  data: testCases,
+  task: async (input) => {
+    // Prompt will be evolved by genetic algorithm
+    const response = await openai.chat.completions.create({...});
+    return response.choices[0]?.message?.content?.trim() || "";
+  },
+  scorers: [
+    {
+      name: "levenshtein",
+      scorer: Levenshtein,
+    },
   ],
-  expectedOutputs: [
-    "Climate patterns are changing globally, affecting weather and ecosystems",
-    "Balanced diet with whole foods, lean proteins, and vegetables promotes health",
-    "Research destinations, book early, pack light, and embrace local culture",
-    "Save regularly, diversify investments, and plan for long-term goals",
-    "Regular exercise, good sleep, and stress management are key to wellness",
-  ],
-  initialPrompt: "Summarize the main point of this article in one sentence",
-  evaluationMethod: "semantic-similarity",
-  outputDir: "results",
-};
+});
 ```
 
-### Running File-Based Evals
+### Built-in Scorers
 
-```bash
-npm run start -- --eval=article-summary
-```
-
-### Evaluation Methods
-
-- **semantic-similarity**: Uses OpenAI embeddings to compare semantic meaning
-- **llm-judge**: Uses GPT to evaluate output quality against expected result
-- **exact-match**: String matching with partial credit for similar words
+Available scorers from the autoevals library:
+- **Levenshtein**: Edit distance between strings
+- **SemanticSimilarity**: Semantic similarity using embeddings
+- **FactualityScorer**: Fact-checking and accuracy scoring
+- **RelevanceScorer**: Relevance to the task
+- **CoherenceScorer**: Text coherence and flow
 
 ### Results
 
-Results are saved to `results/<eval-name>-<timestamp>.json` with:
-
-- Initial prompt score
-- Hall of fame (best evolved prompts)
+Results are saved to `evalite-results/evolution-results.json` with:
+- Best evolved prompts
+- Hall of fame (top performing prompts)
 - Evolution statistics
 - Generation-by-generation progress
 

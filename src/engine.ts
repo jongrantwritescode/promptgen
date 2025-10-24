@@ -29,8 +29,6 @@ import {
   llmFitnessEvaluator,
   heuristicFitnessEvaluator,
 } from "./fitness/fitnessEvaluator.js";
-import { evaliteIntegration } from "./fitness/evaliteIntegration.js";
-import { createFileBasedEvaluator } from "./fitness/fileBasedEvaluator.js";
 import { OpenAIProvider } from "./providers/openaiProvider.js";
 import { defaultConfig } from "./config/default.config.js";
 
@@ -40,20 +38,13 @@ export class PromptGenEngine {
   private testCases: TestCase[];
   private stats: EvolutionStats[] = [];
   private totalEvaluations = 0;
-  private evaluationMethod?:
-    | "semantic-similarity"
-    | "llm-judge"
-    | "exact-match"
-    | undefined;
 
   constructor(
     config: Config,
-    testCases: TestCase[],
-    evaluationMethod?: "semantic-similarity" | "llm-judge" | "exact-match"
+    testCases: TestCase[]
   ) {
     this.config = config;
     this.testCases = testCases;
-    this.evaluationMethod = evaluationMethod;
     this.hallOfFame = new HallOfFame(config.populationSize);
   }
 
@@ -188,89 +179,17 @@ export class PromptGenEngine {
   }
 
   private async evaluateFitness(promptText: string): Promise<number> {
-    if (this.evaluationMethod) {
-      // Use file-based evaluation
-      console.log(
-        `    🎯 Running file-based evaluation (${this.evaluationMethod})...`
-      );
-      const fileBasedEvaluator = createFileBasedEvaluator(
-        this.evaluationMethod
-      );
-      const fileBasedScore = await fileBasedEvaluator.evaluate(
-        promptText,
-        this.testCases
-      );
-      console.log(`    🎯 File-based Score: ${fileBasedScore.toFixed(3)}`);
-
-      console.log(`    📏 Running heuristic evaluation...`);
-      const heuristicScore = await heuristicFitnessEvaluator.evaluate(
-        promptText,
-        this.testCases
-      );
-      console.log(`    📏 Heuristic Score: ${heuristicScore.toFixed(3)}`);
-
-      const combinedScore = fileBasedScore * 0.8 + heuristicScore * 0.2;
-      console.log(`    🎯 Combined Score: ${combinedScore.toFixed(3)}`);
-
-      return Math.max(0, Math.min(1, combinedScore));
-    } else {
-      // Use traditional Evalite-based evaluation
-      console.log(`    🎯 Running Evalite-based evaluation...`);
-      const evaliteScore = await evaliteIntegration.evaluate(
-        promptText,
-        this.testCases
-      );
-      console.log(`    🎯 Evalite Score: ${evaliteScore.toFixed(3)}`);
-
-      console.log(`    📏 Running heuristic evaluation...`);
-      const heuristicScore = await heuristicFitnessEvaluator.evaluate(
-        promptText,
-        this.testCases
-      );
-      console.log(`    📏 Heuristic Score: ${heuristicScore.toFixed(3)}`);
-
-      const combinedScore = evaliteScore * 0.8 + heuristicScore * 0.2;
-      console.log(`    🎯 Combined Score: ${combinedScore.toFixed(3)}`);
-
-      return Math.max(0, Math.min(1, combinedScore));
-    }
-  }
-
-  /**
-   * Evaluate fitness using file-based evaluator for document processing tasks
-   */
-  async evaluateFitnessWithFileBasedEvaluator(
-    promptText: string,
-    evaluationMethod:
-      | "semantic-similarity"
-      | "llm-judge"
-      | "exact-match" = "semantic-similarity"
-  ): Promise<number> {
-    console.log(
-      `    🎯 Running file-based evaluation (${evaluationMethod})...`
-    );
-
-    const fileBasedEvaluator = createFileBasedEvaluator(evaluationMethod);
-    const fileBasedScore = await fileBasedEvaluator.evaluate(
-      promptText,
-      this.testCases
-    );
-    console.log(`    🎯 File-based Score: ${fileBasedScore.toFixed(3)}`);
-
+    // Use heuristic evaluation for fitness scoring
     console.log(`    📏 Running heuristic evaluation...`);
-    // Use heuristic evaluator for additional criteria
     const heuristicScore = await heuristicFitnessEvaluator.evaluate(
       promptText,
       this.testCases
     );
     console.log(`    📏 Heuristic Score: ${heuristicScore.toFixed(3)}`);
 
-    // Combine scores - File-based evaluation provides comprehensive scoring
-    const combinedScore = fileBasedScore * 0.8 + heuristicScore * 0.2;
-    console.log(`    🎯 Combined Score: ${combinedScore.toFixed(3)}`);
-
-    return Math.max(0, Math.min(1, combinedScore));
+    return Math.max(0, Math.min(1, heuristicScore));
   }
+
 
   private updateHallOfFame(population: Prompt[]): void {
     for (const prompt of population) {

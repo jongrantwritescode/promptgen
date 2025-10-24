@@ -1,121 +1,121 @@
 {
-  "timestamp": "2025-10-24T19:04:55.252Z",
+  "timestamp": "2025-10-24T20:30:42.880Z",
   "bestPrompt": {
-    "id": "3eb2f9c1-8cee-4330-84be-00c3cd4a3e10",
-    "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response. Be precise and concise.",
-    "fitness": 0.7692000000000001,
+    "id": "ac031cc5-9c7a-49b7-8fb5-9afd74794cc5",
+    "text": "Task: Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+    "fitness": 0.7799999999999999,
     "generation": 0
   },
   "hallOfFame": [
     {
-      "id": "3eb2f9c1-8cee-4330-84be-00c3cd4a3e10",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response. Be precise and concise.",
-      "fitness": 0.7692000000000001,
+      "id": "ac031cc5-9c7a-49b7-8fb5-9afd74794cc5",
+      "text": "Task: Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.7799999999999999,
       "generation": 0
     },
     {
-      "id": "063096be-849d-4ef6-a521-ab380926e36f",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7500000000000001,
+      "id": "873cfe2c-ee2a-4ddc-b3e8-15842d55b19e",
+      "text": "Task: Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.7799999999999999,
       "generation": 0
     },
     {
-      "id": "0d7c872f-6d1e-4176-82ae-f36f0db735b9",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7500000000000001,
+      "id": "d66479a9-78ad-4c04-bf5f-fd607fd1e9b5",
+      "text": "Task: Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.7799999999999999,
       "generation": 0
     },
     {
-      "id": "f96fc3fe-2e45-4050-a5c8-59cbe38f287f",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7500000000000001,
+      "id": "2cd1a778-6e47-4f87-abc5-3d95ef9b6e45",
+      "text": "Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.686,
       "generation": 0
     },
     {
-      "id": "13e82fde-2970-41dc-bc08-f59b21ec7b02",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7500000000000001,
+      "id": "ff23beed-d9bf-466f-96c1-7862c5fdbb57",
+      "text": "Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.686,
       "generation": 0
     },
     {
-      "id": "fa54ad3f-2baa-4897-8d10-bb666cdfb332",
-      "text": "Analyze the following user input and categorize it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7496,
+      "id": "d429fb43-9209-45a8-bdf9-183d77642ce4",
+      "text": "Classify the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.686,
       "generation": 0
     },
     {
-      "id": "1e1995d1-b4c2-40cb-8977-8788a50d992a",
-      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as the userr response.",
-      "fitness": 0.7490000000000001,
+      "id": "1cab0679-d5c7-48bc-b560-9f7a920ddc08",
+      "text": "categorize the following text into one of the predefined categories. Provide your answer in a clear, concise format.",
+      "fitness": 0.684,
       "generation": 0
     },
     {
-      "id": "e7709e1d-9430-464e-b17a-8a37cfee8818",
-      "text": "Task: Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7488000000000001,
+      "id": "ba8b98bb-889e-412a-b4ee-a279373cbd50",
+      "text": "Classify the following text into one of the predefined categories. Provide the userr answer in a clear, concise format.",
+      "fitness": 0.6809999999999999,
       "generation": 0
     },
     {
-      "id": "fb74de93-3a40-4219-9d49-0fb1f58e5207",
-      "text": "Task: Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
-      "fitness": 0.7488000000000001,
+      "id": "7fafdfa7-dd82-41fe-81cf-0509de501130",
+      "text": "Classify the following text into one of the predefined categories. Provide the userr answer in a clear, concise format.",
+      "fitness": 0.6809999999999999,
       "generation": 0
     },
     {
-      "id": "914a5716-b6f3-4a76-812e-8ddec6489ba8",
-      "text": "Given the following input, analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. provide only the category name as your response.",
-      "fitness": 0.6806000000000001,
+      "id": "78904600-bba0-46ff-a4c0-fd30b41e1c1a",
+      "text": "Given the following input, classify the following text into one of the predefined categories. provide your answer in a clear, concise format.",
+      "fitness": 0.659,
       "generation": 0
     }
   ],
   "stats": [
     {
       "generation": 1,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.7446000000000002,
-      "worstFitness": 0.6806000000000001,
-      "diversity": 0.02213016041514386,
-      "timestamp": "2025-10-24T19:04:55.243Z"
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.7102999999999999,
+      "worstFitness": 0.659,
+      "diversity": 0.04624510784937144,
+      "timestamp": "2025-10-24T20:30:42.878Z"
     },
     {
       "generation": 2,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.07692000000000002,
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.07799999999999999,
       "worstFitness": 0,
-      "diversity": 0.23076000000000002,
-      "timestamp": "2025-10-24T19:04:55.245Z"
+      "diversity": 0.23399999999999996,
+      "timestamp": "2025-10-24T20:30:42.879Z"
     },
     {
       "generation": 3,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.07692000000000002,
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.07799999999999999,
       "worstFitness": 0,
-      "diversity": 0.23076000000000002,
-      "timestamp": "2025-10-24T19:04:55.246Z"
+      "diversity": 0.23399999999999996,
+      "timestamp": "2025-10-24T20:30:42.879Z"
     },
     {
       "generation": 4,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.07692000000000002,
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.07799999999999999,
       "worstFitness": 0,
-      "diversity": 0.23076000000000002,
-      "timestamp": "2025-10-24T19:04:55.247Z"
+      "diversity": 0.23399999999999996,
+      "timestamp": "2025-10-24T20:30:42.880Z"
     },
     {
       "generation": 5,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.07692000000000002,
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.07799999999999999,
       "worstFitness": 0,
-      "diversity": 0.23076000000000002,
-      "timestamp": "2025-10-24T19:04:55.248Z"
+      "diversity": 0.23399999999999996,
+      "timestamp": "2025-10-24T20:30:42.880Z"
     },
     {
       "generation": 5,
-      "bestFitness": 0.7692000000000001,
-      "averageFitness": 0.07692000000000002,
+      "bestFitness": 0.7799999999999999,
+      "averageFitness": 0.07799999999999999,
       "worstFitness": 0,
-      "diversity": 0.23076000000000002,
-      "timestamp": "2025-10-24T19:04:55.249Z"
+      "diversity": 0.23399999999999996,
+      "timestamp": "2025-10-24T20:30:42.880Z"
     }
   ],
   "totalGenerations": 5,
