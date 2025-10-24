@@ -109,9 +109,37 @@ promptgen/
 │  ├─ storage/                ← Hall‑of‑Fame logic
 │  ├─ config/                 ← Default task/rubric configuration
 │  └─ util/                   ← Helper functions
-└─ examples/
-   └─ classify-intent/        ← Example task configuration
+├─ examples/                  ← Training configurations
+│  ├─ README.md               ← Examples documentation
+│  └─ classify-intent/        ← Intent classification training
+│     ├─ config.ts            ← Test cases and GA config
+│     └─ task.md              ← Task documentation
+└─ evals/                     ← Evaluation configurations
+   ├─ README.md               ← Evals documentation
+   └─ intent-classification/  ← Intent classification evaluation
+      └─ intent-classification.eval.ts ← Evalite configuration
 ```
+
+## Examples vs Evals
+
+PromptGen uses two complementary directories:
+
+### `examples/` - Training Phase
+- **Purpose**: Train prompts using genetic algorithms
+- **Content**: Test cases, GA configuration, task documentation
+- **Usage**: `npm run start` (runs genetic algorithm training)
+- **Output**: Evolved prompts with improved performance
+
+### `evals/` - Evaluation Phase  
+- **Purpose**: Evaluate evolved prompts using Evalite framework
+- **Content**: Test cases, scoring functions, evaluation logic
+- **Usage**: `npm run eval` (runs prompt evaluation)
+- **Output**: Performance metrics and scores
+
+### Workflow
+1. **Train** prompts in `examples/` using genetic algorithms
+2. **Evaluate** the evolved prompts in `evals/` using Evalite
+3. **Iterate** by refining training data or evaluation criteria
 
 ## License
 

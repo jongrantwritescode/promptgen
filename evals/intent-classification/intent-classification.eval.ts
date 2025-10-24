@@ -32,6 +32,46 @@ const testCases = [
     input: "The weather is nice today",
     expected: "other",
   },
+  {
+    input: "How do I return an item?",
+    expected: "question",
+  },
+  {
+    input: "This product is defective",
+    expected: "complaint",
+  },
+  {
+    input: "Thank you for your help!",
+    expected: "compliment",
+  },
+  {
+    input: "I need to update my address",
+    expected: "request",
+  },
+  {
+    input: "Have a great day!",
+    expected: "other",
+  },
+  {
+    input: "Do you have this in a different color?",
+    expected: "question",
+  },
+  {
+    input: "The delivery was late",
+    expected: "complaint",
+  },
+  {
+    input: "Amazing product quality!",
+    expected: "compliment",
+  },
+  {
+    input: "Please cancel my order",
+    expected: "request",
+  },
+  {
+    input: "Just checking in",
+    expected: "other",
+  },
 ];
 
 evalite("Intent Classification", {

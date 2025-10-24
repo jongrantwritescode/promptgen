@@ -13,6 +13,11 @@ yarn-error.log*
 dist/
 build/
 
+# Compiled TypeScript files in examples
+examples/**/*.js
+examples/**/*.d.ts
+examples/**/*.js.map
+
 # IDE files
 .vscode/
 .idea/
