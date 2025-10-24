@@ -15,30 +15,37 @@ Each eval includes:
 - Scoring functions
 - Integration with Evalite framework
 
+## Available Evals
+
+- **intent-classification**: Classifies user intents (question, complaint, compliment, request, other)
+- **article-summary**: Generates summaries of articles from the data/articles folder
+
 ## Directory Structure
 
 ```
 evals/
 ├── README.md                           # This file
-└── intent-classification/
-    └── intent-classification.eval.ts   # Evalite evaluation configuration
+├── intent-classification/
+│   └── intent-classification.eval.ts   # Intent classification evaluation
+└── article-summary/
+    └── article-summary.eval.ts         # Article summary evaluation
 ```
 
-## How Evals Work with Examples
+## How Evals Work
 
-The `evals/` directory works in conjunction with the `examples/` directory:
+The `evals/` directory contains all evaluation logic and test cases:
 
-1. **Configuration Phase** (`examples/`): Define training parameters and test cases
-2. **Evaluation Phase** (`evals/`): Define evaluation logic (used by both GA and manual testing)
+1. **Evaluation Definition**: Each eval defines test cases, scoring functions, and evaluation logic
+2. **Genetic Algorithm Training**: The genetic algorithm uses the evaluation logic during evolution
+3. **Manual Testing**: Standalone evaluation using Evalite framework
 
 ### Workflow
 
 ```mermaid
 graph LR
-    A[examples/config.ts] --> B[Genetic Algorithm Training]
+    A[evals/eval.ts] --> B[Genetic Algorithm Training]
     B --> C[Evolved Prompts]
-    C --> D[evals/eval.ts]
-    D --> E[Performance Evaluation]
+    C --> D[Performance Evaluation]
     D --> B
 ```
 
@@ -49,7 +56,14 @@ graph LR
 To run evaluations:
 
 ```bash
-# Run all evals
+# Run a specific eval with genetic algorithm evolution
+npm run start --eval=<eval-name>
+
+# Examples:
+npm run start --eval=intent-classification
+npm run start --eval=article-summary
+
+# Run evals directly with Evalite (without genetic algorithm)
 npm run eval
 
 # Serve eval results
@@ -96,21 +110,21 @@ export const articleSummaryEval: FileBasedEvalConfig = {
   name: "Article Summary",
   inputFiles: [
     "data/articles/climate-change.txt",
-    "data/articles/nutrition-guide.txt", 
+    "data/articles/nutrition-guide.txt",
     "data/articles/travel-tips.txt",
     "data/articles/financial-advice.txt",
-    "data/articles/health-wellness.txt"
+    "data/articles/health-wellness.txt",
   ],
   expectedOutputs: [
     "Climate patterns are changing globally, affecting weather and ecosystems",
     "Balanced diet with whole foods, lean proteins, and vegetables promotes health",
     "Research destinations, book early, pack light, and embrace local culture",
     "Save regularly, diversify investments, and plan for long-term goals",
-    "Regular exercise, good sleep, and stress management are key to wellness"
+    "Regular exercise, good sleep, and stress management are key to wellness",
   ],
   initialPrompt: "Summarize the main point of this article in one sentence",
   evaluationMethod: "semantic-similarity",
-  outputDir: "results"
+  outputDir: "results",
 };
 ```
 
@@ -129,6 +143,7 @@ npm run start -- --eval=article-summary
 ### Results
 
 Results are saved to `results/<eval-name>-<timestamp>.json` with:
+
 - Initial prompt score
 - Hall of fame (best evolved prompts)
 - Evolution statistics
@@ -139,9 +154,9 @@ Results are saved to `results/<eval-name>-<timestamp>.json` with:
 To add a new eval:
 
 1. Create a new directory under `evals/`
-2. Add an `*.eval.ts` file with evaluation configuration
-3. Ensure test cases align with corresponding example
-4. Add appropriate scoring functions
+2. Add an `<eval-name>.eval.ts` file with evaluation configuration
+3. Include test cases and scoring functions in the eval file
+4. Run with: `npm run start --eval=<eval-name>`
 
 ## Scoring Functions
 

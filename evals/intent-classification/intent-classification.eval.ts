@@ -86,7 +86,7 @@ evalite("Intent Classification", {
       messages: [
         {
           role: "user",
-          content: `${prompt}\n\nInput: ${input.input}`,
+          content: `${prompt}\n\nInput: ${input}`,
         },
       ],
       temperature: 0.1,
@@ -98,7 +98,7 @@ evalite("Intent Classification", {
   scorers: [
     {
       name: "accuracy",
-      scorer: (output, expected) => {
+      scorer: ({ output, expected }) => {
         // Handle different output types
         const outputStr = typeof output === "string" ? output : String(output);
         const expectedStr =

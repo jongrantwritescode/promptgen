@@ -40,9 +40,17 @@ export class PromptGenEngine {
   private testCases: TestCase[];
   private stats: EvolutionStats[] = [];
   private totalEvaluations = 0;
-  private evaluationMethod?: "semantic-similarity" | "llm-judge" | "exact-match" | undefined;
+  private evaluationMethod?:
+    | "semantic-similarity"
+    | "llm-judge"
+    | "exact-match"
+    | undefined;
 
-  constructor(config: Config, testCases: TestCase[], evaluationMethod?: "semantic-similarity" | "llm-judge" | "exact-match") {
+  constructor(
+    config: Config,
+    testCases: TestCase[],
+    evaluationMethod?: "semantic-similarity" | "llm-judge" | "exact-match"
+  ) {
     this.config = config;
     this.testCases = testCases;
     this.evaluationMethod = evaluationMethod;
@@ -182,9 +190,16 @@ export class PromptGenEngine {
   private async evaluateFitness(promptText: string): Promise<number> {
     if (this.evaluationMethod) {
       // Use file-based evaluation
-      console.log(`    🎯 Running file-based evaluation (${this.evaluationMethod})...`);
-      const fileBasedEvaluator = createFileBasedEvaluator(this.evaluationMethod);
-      const fileBasedScore = await fileBasedEvaluator.evaluate(promptText, this.testCases);
+      console.log(
+        `    🎯 Running file-based evaluation (${this.evaluationMethod})...`
+      );
+      const fileBasedEvaluator = createFileBasedEvaluator(
+        this.evaluationMethod
+      );
+      const fileBasedScore = await fileBasedEvaluator.evaluate(
+        promptText,
+        this.testCases
+      );
       console.log(`    🎯 File-based Score: ${fileBasedScore.toFixed(3)}`);
 
       console.log(`    📏 Running heuristic evaluation...`);
@@ -225,13 +240,21 @@ export class PromptGenEngine {
    * Evaluate fitness using file-based evaluator for document processing tasks
    */
   async evaluateFitnessWithFileBasedEvaluator(
-    promptText: string, 
-    evaluationMethod: "semantic-similarity" | "llm-judge" | "exact-match" = "semantic-similarity"
+    promptText: string,
+    evaluationMethod:
+      | "semantic-similarity"
+      | "llm-judge"
+      | "exact-match" = "semantic-similarity"
   ): Promise<number> {
-    console.log(`    🎯 Running file-based evaluation (${evaluationMethod})...`);
-    
+    console.log(
+      `    🎯 Running file-based evaluation (${evaluationMethod})...`
+    );
+
     const fileBasedEvaluator = createFileBasedEvaluator(evaluationMethod);
-    const fileBasedScore = await fileBasedEvaluator.evaluate(promptText, this.testCases);
+    const fileBasedScore = await fileBasedEvaluator.evaluate(
+      promptText,
+      this.testCases
+    );
     console.log(`    🎯 File-based Score: ${fileBasedScore.toFixed(3)}`);
 
     console.log(`    📏 Running heuristic evaluation...`);

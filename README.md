@@ -30,6 +30,7 @@ OPENAI_API_KEY=sk-...
 ## Usage
 
 ### Traditional Evals (Structured Test Cases)
+
 ```bash
 npm run start
 # or
@@ -37,6 +38,7 @@ npx ts-node src/index.ts
 ```
 
 ### File-Based Evals (Document Processing)
+
 ```bash
 npm run start -- --eval=article-summary
 # or
@@ -153,7 +155,7 @@ PromptGen uses two complementary directories:
 ### Workflow
 
 1. **Configure** training in `examples/` directory
-2. **Define** evaluation logic in `evals/` directory  
+2. **Define** evaluation logic in `evals/` directory
 3. **Train** prompts using genetic algorithm (uses evals logic automatically)
 4. **Evaluate** manually using `npm run eval` (same logic as training)
 5. **Iterate** by refining evaluation criteria in `evals/`
