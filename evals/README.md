@@ -5,10 +5,12 @@ This directory contains evaluation configurations that serve as the **single sou
 ## Purpose
 
 The `evals/` directory defines evaluation logic that is used by **both**:
+
 - **Genetic algorithm training** (automatic evaluation during evolution)
 - **Manual testing** (standalone evaluation using Evalite framework)
 
 Each eval includes:
+
 - Test cases for evaluation
 - Scoring functions
 - Integration with Evalite framework
@@ -82,12 +84,55 @@ evalite("Task Name", {
 });
 ```
 
-## Integration with Examples
+## File-Based Evals
 
-The test cases in `evals/` should align with those in `examples/` to ensure consistent evaluation:
+PromptGen now supports file-based evaluations for testing prompts against multiple documents:
 
-- **Examples**: Training data for genetic algorithm (15 test cases)
-- **Evals**: Evaluation data for performance testing (same 15 test cases)
+### Example: Article Summary Eval
+
+```typescript
+// evals/article-summary/article-summary.eval.ts
+export const articleSummaryEval: FileBasedEvalConfig = {
+  name: "Article Summary",
+  inputFiles: [
+    "data/articles/climate-change.txt",
+    "data/articles/nutrition-guide.txt", 
+    "data/articles/travel-tips.txt",
+    "data/articles/financial-advice.txt",
+    "data/articles/health-wellness.txt"
+  ],
+  expectedOutputs: [
+    "Climate patterns are changing globally, affecting weather and ecosystems",
+    "Balanced diet with whole foods, lean proteins, and vegetables promotes health",
+    "Research destinations, book early, pack light, and embrace local culture",
+    "Save regularly, diversify investments, and plan for long-term goals",
+    "Regular exercise, good sleep, and stress management are key to wellness"
+  ],
+  initialPrompt: "Summarize the main point of this article in one sentence",
+  evaluationMethod: "semantic-similarity",
+  outputDir: "results"
+};
+```
+
+### Running File-Based Evals
+
+```bash
+npm run start -- --eval=article-summary
+```
+
+### Evaluation Methods
+
+- **semantic-similarity**: Uses OpenAI embeddings to compare semantic meaning
+- **llm-judge**: Uses GPT to evaluate output quality against expected result
+- **exact-match**: String matching with partial credit for similar words
+
+### Results
+
+Results are saved to `results/<eval-name>-<timestamp>.json` with:
+- Initial prompt score
+- Hall of fame (best evolved prompts)
+- Evolution statistics
+- Generation-by-generation progress
 
 ## Adding New Evals
 

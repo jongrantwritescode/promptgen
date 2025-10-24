@@ -58,7 +58,7 @@ export class EvaliteRunner {
       console.log(`🔬 Total Evaluations: ${result.totalEvaluations}`);
 
       console.log("\n🏆 Hall of Fame (Top 5):");
-      result.hallOfFame.slice(0, 5).forEach((prompt, index) => {
+      result.hallOfFame.slice(0, 5).forEach((prompt: any, index: number) => {
         console.log(
           `${index + 1}. [${prompt.fitness.toFixed(3)}] "${prompt.text}"`
         );

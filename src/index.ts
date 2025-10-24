@@ -7,10 +7,36 @@ import { TestCase } from "./types.js";
 import { defaultConfig } from "./config/default.config.js";
 import { loadTestCases } from "./util/testCaseLoader.js";
 import { EvaliteRunner } from "./evaliteRunner.js";
+import { runFileBasedEval } from "./fileBasedEvalRunner.js";
+import path from "path";
 
 async function main() {
   console.log("🚀 PromptGen - Genetic Algorithm for Prompt Evolution");
   console.log("====================================================\n");
+
+  // Check for command line arguments
+  const args = process.argv.slice(2);
+  const evalArg = args.find(arg => arg.startsWith('--eval='));
+  
+  if (evalArg) {
+    // Run file-based eval
+    const evalName = evalArg.split('=')[1];
+    const evalPath = path.resolve(`evals/${evalName}/${evalName}.eval.ts`);
+    
+    console.log(`📁 Running file-based eval: ${evalName}`);
+    console.log(`📄 Eval path: ${evalPath}\n`);
+    
+    try {
+      await runFileBasedEval(evalPath);
+      return;
+    } catch (error) {
+      console.error("❌ Error running file-based eval:", error);
+      process.exit(1);
+    }
+  }
+
+  // Default behavior - run traditional eval
+  console.log("📋 Running traditional eval (use --eval=<name> for file-based evals)\n");
 
   // Validate environment
   if (!process.env.OPENAI_API_KEY) {

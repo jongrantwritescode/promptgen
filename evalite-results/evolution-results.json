@@ -1,0 +1,123 @@
+{
+  "timestamp": "2025-10-24T19:04:55.252Z",
+  "bestPrompt": {
+    "id": "3eb2f9c1-8cee-4330-84be-00c3cd4a3e10",
+    "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response. Be precise and concise.",
+    "fitness": 0.7692000000000001,
+    "generation": 0
+  },
+  "hallOfFame": [
+    {
+      "id": "3eb2f9c1-8cee-4330-84be-00c3cd4a3e10",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response. Be precise and concise.",
+      "fitness": 0.7692000000000001,
+      "generation": 0
+    },
+    {
+      "id": "063096be-849d-4ef6-a521-ab380926e36f",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7500000000000001,
+      "generation": 0
+    },
+    {
+      "id": "0d7c872f-6d1e-4176-82ae-f36f0db735b9",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7500000000000001,
+      "generation": 0
+    },
+    {
+      "id": "f96fc3fe-2e45-4050-a5c8-59cbe38f287f",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7500000000000001,
+      "generation": 0
+    },
+    {
+      "id": "13e82fde-2970-41dc-bc08-f59b21ec7b02",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7500000000000001,
+      "generation": 0
+    },
+    {
+      "id": "fa54ad3f-2baa-4897-8d10-bb666cdfb332",
+      "text": "Analyze the following user input and categorize it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7496,
+      "generation": 0
+    },
+    {
+      "id": "1e1995d1-b4c2-40cb-8977-8788a50d992a",
+      "text": "Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as the userr response.",
+      "fitness": 0.7490000000000001,
+      "generation": 0
+    },
+    {
+      "id": "e7709e1d-9430-464e-b17a-8a37cfee8818",
+      "text": "Task: Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7488000000000001,
+      "generation": 0
+    },
+    {
+      "id": "fb74de93-3a40-4219-9d49-0fb1f58e5207",
+      "text": "Task: Analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. Provide only the category name as your response.",
+      "fitness": 0.7488000000000001,
+      "generation": 0
+    },
+    {
+      "id": "914a5716-b6f3-4a76-812e-8ddec6489ba8",
+      "text": "Given the following input, analyze the following user input and classify it into one of these categories: [question, complaint, compliment, request, other]. provide only the category name as your response.",
+      "fitness": 0.6806000000000001,
+      "generation": 0
+    }
+  ],
+  "stats": [
+    {
+      "generation": 1,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.7446000000000002,
+      "worstFitness": 0.6806000000000001,
+      "diversity": 0.02213016041514386,
+      "timestamp": "2025-10-24T19:04:55.243Z"
+    },
+    {
+      "generation": 2,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.07692000000000002,
+      "worstFitness": 0,
+      "diversity": 0.23076000000000002,
+      "timestamp": "2025-10-24T19:04:55.245Z"
+    },
+    {
+      "generation": 3,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.07692000000000002,
+      "worstFitness": 0,
+      "diversity": 0.23076000000000002,
+      "timestamp": "2025-10-24T19:04:55.246Z"
+    },
+    {
+      "generation": 4,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.07692000000000002,
+      "worstFitness": 0,
+      "diversity": 0.23076000000000002,
+      "timestamp": "2025-10-24T19:04:55.247Z"
+    },
+    {
+      "generation": 5,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.07692000000000002,
+      "worstFitness": 0,
+      "diversity": 0.23076000000000002,
+      "timestamp": "2025-10-24T19:04:55.248Z"
+    },
+    {
+      "generation": 5,
+      "bestFitness": 0.7692000000000001,
+      "averageFitness": 0.07692000000000002,
+      "worstFitness": 0,
+      "diversity": 0.23076000000000002,
+      "timestamp": "2025-10-24T19:04:55.249Z"
+    }
+  ],
+  "totalGenerations": 5,
+  "totalEvaluations": 10
+}

@@ -98,3 +98,18 @@ export interface EvolutionResult {
   totalGenerations: number;
   totalEvaluations: number;
 }
+
+export interface FileBasedTestCase {
+  inputFile: string;           // Path to input file
+  expectedOutput: string;      // Expected result after processing
+  metadata?: Record<string, any>;
+}
+
+export interface FileBasedEvalConfig {
+  name: string;
+  inputFiles: string[];        // List of files to test against
+  expectedOutputs: string[];   // Corresponding expected outputs
+  initialPrompt: string;
+  evaluationMethod: "semantic-similarity" | "llm-judge" | "exact-match";
+  outputDir?: string;          // Where to save results
+}

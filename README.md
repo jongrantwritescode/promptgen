@@ -29,11 +29,21 @@ OPENAI_API_KEY=sk-...
 
 ## Usage
 
+### Traditional Evals (Structured Test Cases)
 ```bash
 npm run start
 # or
 npx ts-node src/index.ts
 ```
+
+### File-Based Evals (Document Processing)
+```bash
+npm run start -- --eval=article-summary
+# or
+npx ts-node src/index.ts --eval=article-summary
+```
+
+File-based evals allow you to test prompts against multiple documents, perfect for tasks like summarization, extraction, or analysis of unstructured text.
 
 ## Configuration
 
@@ -135,7 +145,7 @@ PromptGen uses two complementary directories:
 
 - **Purpose**: Evaluation logic used by both genetic algorithm AND manual testing
 - **Content**: Test cases, scoring functions, evaluation logic
-- **Usage**: 
+- **Usage**:
   - `npm run eval` (manual evaluation)
   - Genetic algorithm automatically uses this logic during training
 - **Output**: Performance metrics and scores
@@ -147,6 +157,14 @@ PromptGen uses two complementary directories:
 3. **Train** prompts using genetic algorithm (uses evals logic automatically)
 4. **Evaluate** manually using `npm run eval` (same logic as training)
 5. **Iterate** by refining evaluation criteria in `evals/`
+
+### File-Based Evaluation Workflow
+
+1. **Create** eval file in `evals/<name>/<name>.eval.ts`
+2. **Specify** input files and expected outputs
+3. **Run** evolution: `npm run start -- --eval=<name>`
+4. **Review** results in `results/<name>-<timestamp>.json`
+5. **Iterate** by adjusting evaluation method or test files
 
 ## License
 
