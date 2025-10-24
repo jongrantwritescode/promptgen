@@ -86,6 +86,12 @@ export const defaultConfig: Config = {
   modelName: "gpt-3.5-turbo",
   temperature: 0.7,
   maxTokens: 150,
+  operatorCacheSize: 1000,
+  operatorCacheTTL: 300000, // 5 minutes
+  operatorBatchSize: 5,
+  operatorBatchWindow: 100, // 100ms
+  metaSelectionEnabled: true,
+  operatorTemperature: 0.7,
 };
 
 export const intentClassificationConfig: Config = {

@@ -74,12 +74,17 @@ export const testCases = [
   },
 ];
 
+// Export the seed prompt for the genetic algorithm
+export const seedPrompt =
+  "Classify the following text into one of these categories: question, complaint, compliment, request, other. Provide only the category name as your response.";
+export const taskDescription =
+  "Classify user inputs into intent categories for customer service automation";
+
 evalite("Intent Classification", {
   data: testCases,
   task: async (input) => {
     // This will be replaced with the actual prompt from the genetic algorithm
-    const prompt =
-      "Classify the following text into one of these categories: question, complaint, compliment, request, other. Provide only the category name as your response.";
+    const prompt = seedPrompt;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",

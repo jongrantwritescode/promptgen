@@ -1,18 +1,41 @@
 import { PromptGenEngine } from "./engine.js";
-import { TestCase } from "./types.js";
+import { TestCase, Config } from "./types.js";
 import { defaultConfig } from "./config/default.config.js";
 import * as dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
 
+export interface EvalInfo {
+  testCases: TestCase[];
+  seedPrompt: string;
+  taskDescription: string;
+  evalName: string;
+}
+
 export class EvaliteRunner {
   private engine: PromptGenEngine;
   private testCases: TestCase[];
+  private evalName: string;
+  private config: Config;
 
-  constructor(testCases: TestCase[]) {
-    this.testCases = testCases;
-    this.engine = new PromptGenEngine(defaultConfig, testCases);
+  constructor(evalInfo: EvalInfo) {
+    this.testCases = evalInfo.testCases;
+    this.evalName = evalInfo.evalName;
+    this.config = this.createConfigFromEval(evalInfo);
+    this.engine = new PromptGenEngine(
+      this.config,
+      this.testCases,
+      this.evalName
+    );
+  }
+
+  private createConfigFromEval(evalInfo: EvalInfo): Config {
+    return {
+      ...defaultConfig,
+      seedPrompt: evalInfo.seedPrompt,
+      taskDescription: evalInfo.taskDescription,
+    };
   }
 
   async runEvolution(): Promise<void> {
@@ -52,9 +75,20 @@ export class EvaliteRunner {
       fs.mkdirSync(resultsDir, { recursive: true });
     }
 
-    const resultsFile = path.join(resultsDir, "evolution-results.json");
+    // Generate timestamp for filename
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .slice(0, 19);
+    const resultsFile = path.join(
+      resultsDir,
+      `${this.evalName}-${timestamp}.json`
+    );
+
     const resultsData = {
+      evalName: this.evalName,
       timestamp: new Date().toISOString(),
+      originalPrompt: this.config.seedPrompt,
       bestPrompt: result.bestPrompt,
       hallOfFame: result.hallOfFame.slice(0, 10), // Top 10
       stats: result.stats,
@@ -70,21 +104,26 @@ export class EvaliteRunner {
 /**
  * Load and run an Evalite eval from a file path
  */
-export async function runEvaliteEval(evalPath: string): Promise<void> {
+export async function runEvaliteEval(
+  evalPath: string,
+  evalName: string
+): Promise<void> {
   try {
     // Dynamic import of the eval file
     const evalModule = await import(evalPath);
 
-    // Extract test cases from the eval file
-    const testCases = extractTestCasesFromEvalite(evalModule);
+    // Extract eval information from the eval file
+    const evalInfo = extractEvalInfoFromEvalite(evalModule, evalName);
 
-    if (!testCases || testCases.length === 0) {
+    if (!evalInfo.testCases || evalInfo.testCases.length === 0) {
       throw new Error(`No test cases found in ${evalPath}`);
     }
 
-    console.log(`📋 Loaded ${testCases.length} test cases from eval`);
+    console.log(`📋 Loaded ${evalInfo.testCases.length} test cases from eval`);
+    console.log(`🎯 Seed prompt: "${evalInfo.seedPrompt}"`);
+    console.log(`📝 Task description: ${evalInfo.taskDescription}`);
 
-    const runner = new EvaliteRunner(testCases);
+    const runner = new EvaliteRunner(evalInfo);
     await runner.runEvolution();
   } catch (error) {
     console.error("❌ Error running Evalite eval:", error);
@@ -93,20 +132,31 @@ export async function runEvaliteEval(evalPath: string): Promise<void> {
 }
 
 /**
- * Extract test cases from an Evalite eval module
+ * Extract eval information from an Evalite eval module
  */
-function extractTestCasesFromEvalite(evalModule: any): TestCase[] {
-  // Look for test cases in various possible locations
+function extractEvalInfoFromEvalite(
+  evalModule: any,
+  evalName: string
+): EvalInfo {
+  // Extract test cases
+  let testCases: TestCase[] = [];
   if (evalModule.testCases) {
-    return evalModule.testCases.map((tc: any) => ({
+    testCases = evalModule.testCases.map((tc: any) => ({
       input: tc.input,
       expectedOutput: tc.expected,
       metadata: tc.metadata || {},
     }));
   }
 
-  // If no testCases export, we'll need to parse the evalite call
-  // This is a simplified approach - in a real implementation, you might need
-  // to parse the evalite function call more carefully
-  return [];
+  // Extract seed prompt and task description from exported values
+  const seedPrompt = evalModule.seedPrompt || "Complete the following task:";
+  const taskDescription =
+    evalModule.taskDescription || `Complete ${evalName} task`;
+
+  return {
+    testCases,
+    seedPrompt,
+    taskDescription,
+    evalName,
+  };
 }

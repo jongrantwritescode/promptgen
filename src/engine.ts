@@ -5,6 +5,7 @@ import {
   EvolutionResult,
   EvolutionStats,
   TestCase,
+  LLMProvider,
 } from "./types.js";
 import { HallOfFame } from "./storage/hallOfFame.js";
 import {
@@ -13,24 +14,15 @@ import {
   MutationOperator,
 } from "./types.js";
 import {
-  tournamentSelection,
-  rouletteSelection,
-} from "./operators/selection.js";
-import {
-  singlePointCrossover,
-  uniformCrossover,
-} from "./operators/crossover.js";
-import {
-  wordMutation,
-  phraseMutation,
-  structureMutation,
-} from "./operators/mutation.js";
-import {
   llmFitnessEvaluator,
   heuristicFitnessEvaluator,
 } from "./fitness/fitnessEvaluator.js";
 import { OpenAIProvider } from "./providers/openaiProvider.js";
 import { defaultConfig } from "./config/default.config.js";
+import { LLMOperatorSelector } from "./operators/metaSelector.js";
+import { operatorCache } from "./util/operatorCache.js";
+import { OperatorBatcher } from "./util/operatorBatcher.js";
+import { operatorStatsTracker } from "./storage/operatorStats.js";
 
 export class PromptGenEngine {
   private config: Config;
@@ -38,11 +30,33 @@ export class PromptGenEngine {
   private testCases: TestCase[];
   private stats: EvolutionStats[] = [];
   private totalEvaluations = 0;
+  private llmProvider: LLMProvider;
+  private operatorSelector: LLMOperatorSelector;
+  private operatorBatcher: OperatorBatcher;
+  private evalName: string;
 
-  constructor(config: Config, testCases: TestCase[]) {
+  constructor(
+    config: Config,
+    testCases: TestCase[],
+    evalName: string = "unknown"
+  ) {
     this.config = config;
     this.testCases = testCases;
+    this.evalName = evalName;
     this.hallOfFame = new HallOfFame(config.populationSize);
+
+    // Initialize LLM provider
+    this.llmProvider = new OpenAIProvider();
+
+    // Initialize operator selector
+    this.operatorSelector = new LLMOperatorSelector(this.llmProvider, config);
+
+    // Initialize operator batcher
+    this.operatorBatcher = new OperatorBatcher(
+      this.llmProvider,
+      config.operatorBatchSize,
+      config.operatorBatchWindow
+    );
   }
 
   async evolve(): Promise<EvolutionResult> {
@@ -180,7 +194,8 @@ export class PromptGenEngine {
     console.log(`    🤖 Running LLM evaluation...`);
     const llmScore = await llmFitnessEvaluator.evaluate(
       promptText,
-      this.testCases
+      this.testCases,
+      this.evalName
     );
     console.log(`    🤖 LLM Score: ${llmScore.toFixed(3)}`);
 
@@ -281,24 +296,64 @@ export class PromptGenEngine {
 
   private async generateOffspring(population: Prompt[]): Promise<Prompt> {
     console.log(`      👥 Selecting parents...`);
-    // Selection
-    const parent1 = this.selectParent(population);
-    const parent2 = this.selectParent(population);
+
+    // Use LLM selection operators
+    const selectionOperator =
+      await this.operatorSelector.selectSelectionOperator(
+        population,
+        2,
+        this.stats.length
+      );
+
+    const selectedParents = await selectionOperator.select(
+      population,
+      2,
+      this.config,
+      this.llmProvider
+    );
+    const parent1 = selectedParents[0]!;
+    const parent2 = selectedParents[1] || parent1;
+
     console.log(
       `      👥 Selected parents with fitness: ${parent1.fitness.toFixed(
         3
       )}, ${parent2.fitness.toFixed(3)}`
     );
 
+    // Track operator usage
+    const startTime = Date.now();
+    let fitnessImprovement = 0;
+
     // Crossover
     let offspring: Prompt;
     if (Math.random() < this.config.crossoverRate) {
       console.log(`      🔀 Performing crossover...`);
-      const crossoverOperator = this.getCrossoverOperator();
-      const offspringArray = crossoverOperator.crossover(parent1, parent2);
+      const crossoverOperator =
+        await this.operatorSelector.selectCrossoverOperator(
+          parent1,
+          parent2,
+          population,
+          this.stats.length
+        );
+
+      const offspringArray = await crossoverOperator.crossover(
+        parent1,
+        parent2,
+        this.llmProvider
+      );
       offspring =
         offspringArray[Math.floor(Math.random() * offspringArray.length)] ||
         parent1;
+
+      // Track crossover operator performance
+      const responseTime = Date.now() - startTime;
+      operatorStatsTracker.recordUsage(
+        crossoverOperator.name,
+        fitnessImprovement,
+        true,
+        responseTime,
+        false // TODO: implement cache hit detection
+      );
     } else {
       console.log(`      📋 No crossover, copying parent...`);
       offspring = { ...parent1 };
@@ -307,8 +362,33 @@ export class PromptGenEngine {
     // Mutation
     if (Math.random() < this.config.mutationRate) {
       console.log(`      🧬 Applying mutation...`);
-      const mutationOperator = this.getMutationOperator();
-      offspring.text = await mutationOperator.mutate(offspring.text);
+      const mutationOperator =
+        await this.operatorSelector.selectMutationOperator(
+          offspring.text,
+          population,
+          this.stats.length,
+          this.hallOfFame.getAll()
+        );
+
+      const originalText = offspring.text;
+      offspring.text = await mutationOperator.mutate(
+        offspring.text,
+        this.llmProvider,
+        {
+          hallOfFame: this.hallOfFame.getAll(),
+          generation: this.stats.length,
+        }
+      );
+
+      // Track mutation operator performance
+      const responseTime = Date.now() - startTime;
+      operatorStatsTracker.recordUsage(
+        mutationOperator.name,
+        fitnessImprovement,
+        offspring.text !== originalText,
+        responseTime,
+        false // TODO: implement cache hit detection
+      );
     } else {
       console.log(`      🧬 No mutation applied...`);
     }
@@ -326,32 +406,23 @@ export class PromptGenEngine {
     return offspring;
   }
 
-  private selectParent(population: Prompt[]): Prompt {
-    if (population.length === 0) {
-      throw new Error("Cannot select from empty population");
-    }
-
-    if (this.config.selectionMethod === "tournament") {
-      const selected = tournamentSelection.select(population, 1, this.config);
-      return selected[0]!;
-    } else {
-      const selected = rouletteSelection.select(population, 1, this.config);
-      return selected[0]!;
-    }
+  // Add method to get operator statistics
+  getOperatorStats(): string {
+    return operatorStatsTracker.exportStats();
   }
 
-  private getCrossoverOperator(): CrossoverOperator {
-    const operators = [singlePointCrossover, uniformCrossover];
-    return (
-      operators[Math.floor(Math.random() * operators.length)] ||
-      singlePointCrossover
-    );
+  // Add method to get cache statistics
+  getCacheStats(): { hits: number; misses: number; size: number } {
+    return operatorCache.getStats();
   }
 
-  private getMutationOperator(): MutationOperator {
-    const operators = [wordMutation, phraseMutation, structureMutation];
-    return (
-      operators[Math.floor(Math.random() * operators.length)] || wordMutation
-    );
+  // Add method to flush batcher
+  async flushBatcher(): Promise<void> {
+    await this.operatorBatcher.flush();
+  }
+
+  // Add method to get config
+  getConfig(): Config {
+    return this.config;
   }
 }

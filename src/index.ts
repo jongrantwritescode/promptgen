@@ -15,13 +15,19 @@ async function main() {
 
   if (evalArg) {
     const evalName = evalArg.split("=")[1];
+
+    if (!evalName) {
+      console.error("❌ No eval name provided!");
+      process.exit(1);
+    }
+
     const evalPath = path.resolve(`evals/${evalName}/${evalName}.eval.ts`);
 
     console.log(`📁 Running eval: ${evalName}`);
     console.log(`📄 Eval path: ${evalPath}\n`);
 
     try {
-      await runEvaliteEval(evalPath);
+      await runEvaliteEval(evalPath, evalName);
       return;
     } catch (error) {
       console.error("❌ Error running eval:", error);

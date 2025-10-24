@@ -28,6 +28,12 @@ export interface Config {
   modelName: string;
   temperature: number;
   maxTokens: number;
+  operatorCacheSize: number;
+  operatorCacheTTL: number;
+  operatorBatchSize: number;
+  operatorBatchWindow: number;
+  metaSelectionEnabled: boolean;
+  operatorTemperature: number;
 }
 
 export interface Rubric {
@@ -46,27 +52,48 @@ export interface RubricCriterion {
 
 export interface FitnessEvaluator {
   name: string;
-  evaluate: (prompt: string, testCases: TestCase[]) => Promise<number>;
+  evaluate: (
+    prompt: string,
+    testCases: TestCase[],
+    evalName?: string
+  ) => Promise<number>;
 }
 
 export interface SelectionOperator {
   name: string;
-  select: (population: Prompt[], count: number, config: Config) => Prompt[];
+  select: (
+    population: Prompt[],
+    count: number,
+    config: Config,
+    llmProvider: LLMProvider
+  ) => Promise<Prompt[]>;
 }
 
 export interface CrossoverOperator {
   name: string;
-  crossover: (parent1: Prompt, parent2: Prompt) => Prompt[];
+  crossover: (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ) => Promise<Prompt[]>;
 }
 
 export interface MutationOperator {
   name: string;
-  mutate: (prompt: string) => Promise<string>;
+  mutate: (
+    prompt: string,
+    llmProvider: LLMProvider,
+    context?: any
+  ) => Promise<string>;
 }
 
 export interface LLMProvider {
   name: string;
   generate: (prompt: string, config: Partial<Config>) => Promise<string>;
+  batchGenerate: (
+    prompts: string[],
+    config: Partial<Config>
+  ) => Promise<string[]>;
   evaluate: (
     prompt: string,
     testCase: TestCase,
@@ -97,4 +124,39 @@ export interface EvolutionResult {
   stats: EvolutionStats[];
   totalGenerations: number;
   totalEvaluations: number;
+}
+
+export interface LLMOperatorConfig {
+  operatorCacheSize: number;
+  operatorCacheTTL: number;
+  operatorBatchSize: number;
+  operatorBatchWindow: number;
+  metaSelectionEnabled: boolean;
+  operatorTemperature: number;
+}
+
+export interface LLMAdaptiveOperator {
+  name: string;
+  adapt: (
+    performance: number,
+    generation: number,
+    llmProvider: LLMProvider
+  ) => Promise<void>;
+  getCurrentParameters: () => Record<string, any>;
+}
+
+export interface OperatorCache {
+  get: (key: string) => string | null;
+  set: (key: string, value: string, ttl?: number) => void;
+  clear: () => void;
+  getStats: () => { hits: number; misses: number; size: number };
+}
+
+export interface OperatorBatchRequest {
+  id: string;
+  type: "crossover" | "mutation" | "selection";
+  prompt: string;
+  context?: any;
+  resolve: (result: string) => void;
+  reject: (error: Error) => void;
 }

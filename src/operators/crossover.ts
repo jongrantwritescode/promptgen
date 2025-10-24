@@ -1,91 +1,277 @@
-import { Prompt, CrossoverOperator } from "../types.js";
+import { Prompt, CrossoverOperator, LLMProvider } from "../types.js";
 import { v4 as uuidv4 } from "uuid";
+import { operatorCache } from "../util/operatorCache.js";
+import { OperatorBatcher } from "../util/operatorBatcher.js";
 
-export const singlePointCrossover: CrossoverOperator = {
-  name: "single-point",
-  crossover: (parent1: Prompt, parent2: Prompt): Prompt[] => {
-    const text1 = parent1.text;
-    const text2 = parent2.text;
+// Helper function to create offspring
+function createOffspring(
+  parent1: Prompt,
+  parent2: Prompt,
+  text1: string,
+  text2: string,
+  operation: string
+): Prompt[] {
+  const offspring1: Prompt = {
+    id: uuidv4(),
+    text: text1.trim(),
+    fitness: 0,
+    generation: Math.max(parent1.generation, parent2.generation) + 1,
+    parentIds: [parent1.id, parent2.id],
+    mutationHistory: [operation],
+  };
 
-    // Find a good crossover point (avoid splitting words)
-    const words1 = text1.split(" ");
-    const words2 = text2.split(" ");
+  const offspring2: Prompt = {
+    id: uuidv4(),
+    text: text2.trim(),
+    fitness: 0,
+    generation: Math.max(parent1.generation, parent2.generation) + 1,
+    parentIds: [parent1.id, parent2.id],
+    mutationHistory: [operation],
+  };
 
-    const minLength = Math.min(words1.length, words2.length);
-    const crossoverPoint = Math.floor(Math.random() * minLength) + 1;
+  return [offspring1, offspring2];
+}
 
-    // Create offspring
-    const offspring1Text =
-      words1.slice(0, crossoverPoint).join(" ") +
-      " " +
-      words2.slice(crossoverPoint).join(" ");
-    const offspring2Text =
-      words2.slice(0, crossoverPoint).join(" ") +
-      " " +
-      words1.slice(crossoverPoint).join(" ");
+// Generic LLM crossover function with caching and batching
+async function performLLMCrossover(
+  parent1: Prompt,
+  parent2: Prompt,
+  strategy: string,
+  llmProvider: LLMProvider,
+  batcher: OperatorBatcher
+): Promise<Prompt[]> {
+  const cacheKey = operatorCache.generateKey(
+    `crossover-${strategy}`,
+    `${parent1.text}|${parent2.text}`
+  );
 
-    const offspring1: Prompt = {
-      id: uuidv4(),
-      text: offspring1Text.trim(),
-      fitness: 0,
-      generation: Math.max(parent1.generation, parent2.generation) + 1,
-      parentIds: [parent1.id, parent2.id],
-      mutationHistory: ["single-point-crossover"],
-    };
+  // Check cache first
+  const cached = operatorCache.get(cacheKey);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      return createOffspring(
+        parent1,
+        parent2,
+        parsed.text1,
+        parsed.text2,
+        `llm-${strategy}-crossover`
+      );
+    } catch {
+      // Invalid cache entry, continue with LLM call
+    }
+  }
 
-    const offspring2: Prompt = {
-      id: uuidv4(),
-      text: offspring2Text.trim(),
-      fitness: 0,
-      generation: Math.max(parent1.generation, parent2.generation) + 1,
-      parentIds: [parent1.id, parent2.id],
-      mutationHistory: ["single-point-crossover"],
-    };
+  const crossoverPrompt = `
+You are a prompt engineering expert. Combine these two prompts using ${strategy} approach:
 
-    return [offspring1, offspring2];
+Prompt 1: "${parent1.text}"
+Prompt 2: "${parent2.text}"
+
+Generate two distinct, effective offspring prompts that:
+- Preserve the best elements from both parents
+- Use ${strategy} combination strategy
+- Are syntactically correct and clear
+- Maintain the original task objective
+
+Return exactly two prompts, separated by "---":
+`;
+
+  try {
+    const result = await batcher.addRequest("crossover", crossoverPrompt);
+    const prompts = result
+      .split("---")
+      .map((p) => p.trim())
+      .slice(0, 2);
+
+    if (prompts.length < 2) {
+      throw new Error("LLM did not return two prompts");
+    }
+
+    // Cache the result
+    operatorCache.set(
+      cacheKey,
+      JSON.stringify({
+        text1: prompts[0],
+        text2: prompts[1],
+      })
+    );
+
+    return createOffspring(
+      parent1,
+      parent2,
+      prompts[0]!,
+      prompts[1]!,
+      `llm-${strategy}-crossover`
+    );
+  } catch (error) {
+    console.warn(`LLM crossover failed, using fallback: ${error}`);
+    // Fallback to simple concatenation
+    return createOffspring(
+      parent1,
+      parent2,
+      `${parent1.text} ${parent2.text}`,
+      `${parent2.text} ${parent1.text}`,
+      `fallback-${strategy}-crossover`
+    );
+  }
+}
+
+export const llmSinglePointCrossover: CrossoverOperator = {
+  name: "llm-single-point",
+  crossover: async (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ): Promise<Prompt[]> => {
+    const batcher = new OperatorBatcher(llmProvider);
+    return performLLMCrossover(
+      parent1,
+      parent2,
+      "single-point",
+      llmProvider,
+      batcher
+    );
   },
 };
 
-export const uniformCrossover: CrossoverOperator = {
-  name: "uniform",
-  crossover: (parent1: Prompt, parent2: Prompt): Prompt[] => {
-    const words1 = parent1.text.split(" ");
-    const words2 = parent2.text.split(" ");
+export const llmUniformCrossover: CrossoverOperator = {
+  name: "llm-uniform",
+  crossover: async (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ): Promise<Prompt[]> => {
+    const batcher = new OperatorBatcher(llmProvider);
+    return performLLMCrossover(
+      parent1,
+      parent2,
+      "uniform",
+      llmProvider,
+      batcher
+    );
+  },
+};
 
-    const maxLength = Math.max(words1.length, words2.length);
-    let offspring1Words: string[] = [];
-    let offspring2Words: string[] = [];
+export const llmMultiPointCrossover: CrossoverOperator = {
+  name: "llm-multi-point",
+  crossover: async (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ): Promise<Prompt[]> => {
+    const batcher = new OperatorBatcher(llmProvider);
+    return performLLMCrossover(
+      parent1,
+      parent2,
+      "multi-point",
+      llmProvider,
+      batcher
+    );
+  },
+};
 
-    for (let i = 0; i < maxLength; i++) {
-      const useParent1 = Math.random() < 0.5;
+export const llmSemanticCrossover: CrossoverOperator = {
+  name: "llm-semantic",
+  crossover: async (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ): Promise<Prompt[]> => {
+    const batcher = new OperatorBatcher(llmProvider);
+    return performLLMCrossover(
+      parent1,
+      parent2,
+      "semantic",
+      llmProvider,
+      batcher
+    );
+  },
+};
 
-      if (useParent1) {
-        offspring1Words.push(words1[i] || "");
-        offspring2Words.push(words2[i] || "");
-      } else {
-        offspring1Words.push(words2[i] || "");
-        offspring2Words.push(words1[i] || "");
+export const llmHybridCrossover: CrossoverOperator = {
+  name: "llm-hybrid",
+  crossover: async (
+    parent1: Prompt,
+    parent2: Prompt,
+    llmProvider: LLMProvider
+  ): Promise<Prompt[]> => {
+    const cacheKey = operatorCache.generateKey(
+      "crossover-hybrid",
+      `${parent1.text}|${parent2.text}`
+    );
+
+    // Check cache first
+    const cached = operatorCache.get(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        return createOffspring(
+          parent1,
+          parent2,
+          parsed.text1,
+          parsed.text2,
+          "llm-hybrid-crossover"
+        );
+      } catch {
+        // Invalid cache entry, continue with LLM call
       }
     }
 
-    const offspring1: Prompt = {
-      id: uuidv4(),
-      text: offspring1Words.join(" ").trim(),
-      fitness: 0,
-      generation: Math.max(parent1.generation, parent2.generation) + 1,
-      parentIds: [parent1.id, parent2.id],
-      mutationHistory: ["uniform-crossover"],
-    };
+    const hybridPrompt = `
+Analyze these two prompts and determine the best combination strategy:
 
-    const offspring2: Prompt = {
-      id: uuidv4(),
-      text: offspring2Words.join(" ").trim(),
-      fitness: 0,
-      generation: Math.max(parent1.generation, parent2.generation) + 1,
-      parentIds: [parent1.id, parent2.id],
-      mutationHistory: ["uniform-crossover"],
-    };
+Prompt 1: "${parent1.text}"
+Prompt 2: "${parent2.text}"
 
-    return [offspring1, offspring2];
+Choose the most appropriate crossover approach:
+- Single-point: Split and swap sections
+- Uniform: Mix elements throughout
+- Multi-point: Multiple crossover points
+- Semantic: Combine based on meaning
+
+Generate two offspring using your chosen strategy. Explain your choice briefly, then provide the two prompts separated by "---":
+`;
+
+    const batcher = new OperatorBatcher(llmProvider);
+
+    try {
+      const result = await batcher.addRequest("crossover", hybridPrompt);
+      const prompts = result
+        .split("---")
+        .map((p) => p.trim())
+        .slice(0, 2);
+
+      if (prompts.length < 2) {
+        throw new Error("LLM did not return two prompts");
+      }
+
+      // Cache the result
+      operatorCache.set(
+        cacheKey,
+        JSON.stringify({
+          text1: prompts[0],
+          text2: prompts[1],
+        })
+      );
+
+      return createOffspring(
+        parent1,
+        parent2,
+        prompts[0]!,
+        prompts[1]!,
+        "llm-hybrid-crossover"
+      );
+    } catch (error) {
+      console.warn(`LLM hybrid crossover failed, using fallback: ${error}`);
+      // Fallback to semantic crossover
+      return performLLMCrossover(
+        parent1,
+        parent2,
+        "semantic",
+        llmProvider,
+        batcher
+      );
+    }
   },
 };

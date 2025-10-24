@@ -8,7 +8,11 @@ const rateLimiter = new RateLimiter();
 
 export const llmFitnessEvaluator: FitnessEvaluator = {
   name: "llm",
-  evaluate: async (prompt: string, testCases: TestCase[]): Promise<number> => {
+  evaluate: async (
+    prompt: string,
+    testCases: TestCase[],
+    evalName?: string
+  ): Promise<number> => {
     let totalScore = 0;
     let validTests = 0;
 
@@ -38,13 +42,23 @@ export const llmFitnessEvaluator: FitnessEvaluator = {
           console.log(`        🤖 Running LLM with evolved prompt...`);
 
           // Run the LLM with the evolved prompt
+          // Use the same format as the eval files
+          let content: string;
+          if (evalName === "article-summary") {
+            content = `${prompt}\n\nArticle:\n${testCase.input}`;
+          } else if (evalName === "intent-classification") {
+            content = `${prompt}\n\nInput: ${testCase.input}`;
+          } else {
+            content = `${prompt}\n\n${testCase.input}`;
+          }
+
           const response = await retryWithBackoff(async () => {
             return await openai.chat.completions.create({
               model: "gpt-3.5-turbo",
               messages: [
                 {
                   role: "user",
-                  content: `${prompt}\n\nInput:\n${testCase.input}`,
+                  content: content,
                 },
               ],
               temperature: 0.3,

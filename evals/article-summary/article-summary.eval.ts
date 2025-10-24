@@ -43,11 +43,16 @@ export const testCases = articleFiles.map((filename, index) => {
   };
 });
 
+// Export the seed prompt for the genetic algorithm
+export const seedPrompt =
+  "Summarize the main point of this article in one sentence";
+export const taskDescription = "Create concise summaries of longer texts";
+
 evalite("Article Summary", {
   data: testCases,
   task: async (input) => {
     // This prompt will be evolved by the genetic algorithm
-    const prompt = "Summarize the main point of this article in one sentence";
+    const prompt = seedPrompt;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",

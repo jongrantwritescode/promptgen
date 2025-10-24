@@ -35,6 +35,27 @@ export class OpenAIProvider implements LLMProvider {
     }
   }
 
+  async batchGenerate(
+    prompts: string[],
+    config: Partial<any> = {}
+  ): Promise<string[]> {
+    try {
+      // For now, process prompts individually
+      // In the future, this could be optimized to use OpenAI's batch API
+      const results: string[] = [];
+
+      for (const prompt of prompts) {
+        const result = await this.generate(prompt, config);
+        results.push(result);
+      }
+
+      return results;
+    } catch (error) {
+      console.error("OpenAI batch generation error:", error);
+      throw error;
+    }
+  }
+
   async evaluate(
     prompt: string,
     testCase: TestCase,
