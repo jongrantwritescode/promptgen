@@ -29,6 +29,7 @@ import {
   llmFitnessEvaluator,
   heuristicFitnessEvaluator,
 } from "./fitness/fitnessEvaluator.js";
+import { evaliteFitnessEvaluator } from "./fitness/evaliteFitnessEvaluator.js";
 import { OpenAIProvider } from "./providers/openaiProvider.js";
 import { defaultConfig } from "./config/default.config.js";
 
@@ -176,13 +177,13 @@ export class PromptGenEngine {
   }
 
   private async evaluateFitness(promptText: string): Promise<number> {
-    console.log(`    🤖 Running LLM evaluation...`);
-    // Use LLM evaluator for main fitness
-    const llmScore = await llmFitnessEvaluator.evaluate(
+    console.log(`    🎯 Running Evalite-based evaluation...`);
+    // Use Evalite evaluator for main fitness
+    const evaliteScore = await evaliteFitnessEvaluator.evaluate(
       promptText,
       this.testCases
     );
-    console.log(`    🤖 LLM Score: ${llmScore.toFixed(3)}`);
+    console.log(`    🎯 Evalite Score: ${evaliteScore.toFixed(3)}`);
 
     console.log(`    📏 Running heuristic evaluation...`);
     // Use heuristic evaluator for additional criteria
@@ -192,8 +193,8 @@ export class PromptGenEngine {
     );
     console.log(`    📏 Heuristic Score: ${heuristicScore.toFixed(3)}`);
 
-    // Combine scores based on rubric weights
-    const combinedScore = llmScore * 0.7 + heuristicScore * 0.3;
+    // Combine scores - Evalite provides comprehensive scoring, so we weight it higher
+    const combinedScore = evaliteScore * 0.8 + heuristicScore * 0.2;
     console.log(`    🎯 Combined Score: ${combinedScore.toFixed(3)}`);
 
     return Math.max(0, Math.min(1, combinedScore));
